@@ -4,52 +4,43 @@ import { NavigationActions } from 'react-navigation'
 import { connect } from 'react-redux'
 import Button from './Button'
 import { grey, white, blue }  from '../utils/constants'
-import { addDeck }  from '../actions'
-import { saveDeckTitle } from '../utils/storage'
+import { addQuestion }  from '../actions'
+import { addCardToDeck } from '../utils/storage'
 
-class CreateDeck extends Component {
+class AddCard extends Component {
   state = {
-    title: '',
+    question: '',
+    answer: '',
   }
 
   submit = () => {
-    const { title } = this.state
+    const { deck } = this.props.navigation.state.params;
+    const { question, answer } = this.state
 
-    saveDeckTitle(title)
+    addCardToDeck(deck.title, { question, answer })
 
-    this.props.dispatch(addDeck({
-      [title]: {
-        title,
-        questions: [],
-      },
-    }))
+    this.props.dispatch(addQuestion(deck.title, { question, answer }))
     
-    this.props.navigation.navigate(
-      'Deck',
-      {
-        deck: {
-          title,
-          questions: [],
-        },
-      }
-    )
+    this.props.navigation.goBack()
   }
 
   render () {
     return (
       <View style={styles.container}>
         <View>
-          <Text style={styles.title}>
-            What is the title of your new deck?
-          </Text>
-        </View>
-        <View>
           <TextInput
             style={styles.input}
-            placeholder='Deck name'
+            placeholder='Question'
             selectionColor={blue}
-            onChangeText={(title) => this.setState({ title })}
-            value={this.state.title}
+            onChangeText={(question) => this.setState({ question })}
+            value={this.state.question}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder='Answer'
+            selectionColor={blue}
+            onChangeText={(answer) => this.setState({ answer })}
+            value={this.state.answer}
           />
           <Button style={styles.button} onPress={this.submit}>
             <Text style={styles.buttonText}>Submit</Text>
@@ -65,12 +56,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: grey,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 30,
-    color: blue,
-    textAlign: 'center',
+    justifyContent: 'flex-start',
   },
   input: {
     marginTop: 20,
@@ -97,4 +83,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default connect()(CreateDeck)
+export default connect()(AddCard)

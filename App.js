@@ -1,12 +1,20 @@
-import React from 'react';
-import { StyleSheet, Text, View, StatusBar } from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View, StatusBar, Platform } from 'react-native';
 import { TabNavigator, StackNavigator } from 'react-navigation'
 import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons'
 import { Constants } from 'expo'
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
+import reducer from './reducers'
 
 import Deck from './components/Deck'
 import Decks from './components/Decks'
 import CreateDeck from './components/CreateDeck'
+import Question from './components/Question'
+import AddCard from './components/AddCard'
+
+import { grey, blue, white } from './utils/constants'
+import { setLocalNotification } from './utils/helpers'
 
 const Tabs = TabNavigator({
   Decks: {
@@ -27,6 +35,20 @@ const Tabs = TabNavigator({
   navigationOptions: {
     header: null
   },
+  tabBarOptions: {
+    activeTintColor: Platform.OS === 'ios' ? blue : white,
+    style: {
+      height: 56,
+      backgroundColor: Platform.OS === 'ios' ? white : blue,
+      shadowColor: 'rgba(0, 0, 0, 0.24)',
+      shadowOffset: {
+        width: 0,
+        height: 3
+      },
+      shadowRadius: 6,
+      shadowOpacity: 1
+    }
+  },
 })
 
 const MainNavigator = StackNavigator({
@@ -36,17 +58,36 @@ const MainNavigator = StackNavigator({
   Deck: {
     screen: Deck,
   },
+  Question: {
+    screen: Question,
+  },
+  AddCard: {
+    screen: AddCard,
+  },
+}, {
+  navigationOptions: {
+    headerTintColor: white,
+    headerStyle: {
+      backgroundColor: blue,
+    }
+  },
 })
 
-export default class App extends React.Component {
+export default class App extends Component {
+  componentDidMount () {
+    setLocalNotification()
+  }
+
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <View style={{ height: Constants.statusBarHeight }}>
-          <StatusBar translucent />
+      <Provider store={createStore(reducer)}>
+        <View style={styles.container}>
+          <View style={styles.statusBar}>
+            <StatusBar translucent backgroundColor={blue} barStyle='light-content' />
+          </View>
+          <MainNavigator />
         </View>
-        <MainNavigator />
-      </View>
+      </Provider>
     );
   }
 }
@@ -54,8 +95,10 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: grey,
   },
+  statusBar: {
+    height: Constants.statusBarHeight,
+    backgroundColor: blue,
+  }
 });
